@@ -1,0 +1,31 @@
+name: NSE pattern scan
+
+on:
+  schedule:
+    # Every 5 minutes, 9:15am-3:30pm IST (03:45-10:00 UTC), Mon-Fri
+    - cron: "*/5 3-10 * * 1-5"
+  workflow_dispatch: {}
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install -r requirements.txt
+
+      - run: python scanner.py
+
+      - name: Commit alerts.json if changed
+        run: |
+          git config user.name "nse-scanner-bot"
+          git config user.email "actions@github.com"
+          if ! git diff --quiet alerts.json; then
+            git add alerts.json
+            git commit -m "Update alerts"
+            git push
+          fi
