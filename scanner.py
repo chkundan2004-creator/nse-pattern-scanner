@@ -1,16 +1,16 @@
 """
 scanner.py
 ----------
-Fetches recent price/volume candles for each symbol in watchlist.txt,
-across several timeframes, and checks whether a "squeeze -> breakout"
-pattern has just formed:
+Fetches candles for each symbol in watchlist.txt, across several
+timeframes, and finds every point in the last month where a
+"squeeze -> breakout" pattern formed (not just on the latest candle):
 
-  1. SQUEEZE  : a run of recent candles has a noticeably tighter
-                high-low range than the candles before them (volatility
-                drying up), sitting near a flattening moving average.
-  2. BREAKOUT : the very latest candle has a much bigger range than the
-                squeeze candles, closes beyond the squeeze's high (bullish)
-                or low (bearish), on a volume spike.
+  1. SQUEEZE  : a run of candles has a noticeably tighter high-low
+                range than the candles before them (volatility drying
+                up), sitting near a flattening moving average.
+  2. BREAKOUT : the candle right after the squeeze has a much bigger
+                range, closes beyond the squeeze's high (bullish) or
+                low (bearish), on a volume spike.
 
 Results are written to alerts.json (newest first). Re-running the scan
 will not duplicate an alert for the same symbol/timeframe/candle time.
@@ -18,7 +18,7 @@ will not duplicate an alert for the same symbol/timeframe/candle time.
 
 import json
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 import pandas as pd
 import yfinance as yf
@@ -27,12 +27,16 @@ WATCHLIST_FILE = "watchlist.txt"
 ALERTS_FILE = "alerts.json"
 
 # (yfinance interval, lookback period, human label)
+# Periods pulled generously so a full month of history is available
+# after yfinance's own limits per interval.
 TIMEFRAMES = [
-    ("5m", "5d", "5 min"),
-    ("15m", "5d", "15 min"),
-    ("60m", "1mo", "1 hour"),
+    ("5m", "1mo", "5 min"),
+    ("15m", "1mo", "15 min"),
+    ("60m", "3mo", "1 hour"),
     ("1d", "6mo", "1 day"),
 ]
+
+LOOKBACK_DAYS = 30       # how far back to report pattern occurrences from
 
 SQUEEZE_WINDOW = 10      # candles considered "the squeeze"
 LOOKBACK_MULT = 3        # how many squeeze-windows back to compare against
@@ -65,44 +69,65 @@ def save_alerts(alerts):
         json.dump(alerts, f, indent=2, default=str)
 
 
-def detect_squeeze_breakout(df):
-    """df must have columns Open, High, Low, Close, Volume, sorted oldest -> newest."""
+def find_pattern_occurrences(df):
+    """
+    Scans every candle in df (oldest -> newest) as a potential breakout
+    point and returns a list of matches, each a dict with direction,
+    close, and candle_time. Only checks candles from the last
+    LOOKBACK_DAYS days forward.
+    """
     needed = SQUEEZE_WINDOW * LOOKBACK_MULT + 1
-    if len(df) < needed:
-        return None
+    if len(df) < needed + 1:
+        return []
 
-    latest = df.iloc[-1]
-    squeeze = df.iloc[-(SQUEEZE_WINDOW + 1):-1]
-    broader = df.iloc[-needed:-1]
+    cutoff = None
+    try:
+        last_ts = df.index[-1]
+        cutoff = last_ts - timedelta(days=LOOKBACK_DAYS)
+    except Exception:
+        pass
 
-    squeeze_range = (squeeze["High"] - squeeze["Low"]).mean()
-    broader_range = (broader["High"] - broader["Low"]).mean()
-    if broader_range == 0:
-        return None
+    matches = []
 
-    is_squeeze = (squeeze_range / broader_range) < RANGE_TIGHTNESS
+    for i in range(needed, len(df)):
+        candle_time = df.index[i]
+        if cutoff is not None and candle_time < cutoff:
+            continue
 
-    latest_range = latest["High"] - latest["Low"]
-    is_big_candle = squeeze_range > 0 and latest_range > squeeze_range * BREAKOUT_RANGE_MULT
+        latest = df.iloc[i]
+        squeeze = df.iloc[i - SQUEEZE_WINDOW:i]
+        broader = df.iloc[i - needed:i]
 
-    avg_vol = squeeze["Volume"].mean()
-    is_vol_spike = avg_vol > 0 and latest["Volume"] > avg_vol * VOLUME_SPIKE_MULT
+        squeeze_range = (squeeze["High"] - squeeze["Low"]).mean()
+        broader_range = (broader["High"] - broader["Low"]).mean()
+        if broader_range == 0 or squeeze_range == 0:
+            continue
 
-    broke_up = latest["Close"] > squeeze["High"].max()
-    broke_down = latest["Close"] < squeeze["Low"].min()
+        is_squeeze = (squeeze_range / broader_range) < RANGE_TIGHTNESS
 
-    if is_squeeze and is_big_candle and is_vol_spike and broke_up:
-        direction = "bullish"
-    elif is_squeeze and is_big_candle and is_vol_spike and broke_down:
-        direction = "bearish"
-    else:
-        return None
+        latest_range = latest["High"] - latest["Low"]
+        is_big_candle = latest_range > squeeze_range * BREAKOUT_RANGE_MULT
 
-    return {
-        "direction": direction,
-        "close": round(float(latest["Close"]), 2),
-        "candle_time": str(latest.name),
-    }
+        avg_vol = squeeze["Volume"].mean()
+        is_vol_spike = avg_vol > 0 and latest["Volume"] > avg_vol * VOLUME_SPIKE_MULT
+
+        broke_up = latest["Close"] > squeeze["High"].max()
+        broke_down = latest["Close"] < squeeze["Low"].min()
+
+        if is_squeeze and is_big_candle and is_vol_spike and broke_up:
+            direction = "bullish"
+        elif is_squeeze and is_big_candle and is_vol_spike and broke_down:
+            direction = "bearish"
+        else:
+            continue
+
+        matches.append({
+            "direction": direction,
+            "close": round(float(latest["Close"]), 2),
+            "candle_time": str(candle_time),
+        })
+
+    return matches
 
 
 def scan():
@@ -122,28 +147,27 @@ def scan():
             if df is None or df.empty:
                 continue
 
-            result = detect_squeeze_breakout(df)
-            if result is None:
-                continue
+            for result in find_pattern_occurrences(df):
+                key = (symbol, label, result["candle_time"])
+                if key in seen_keys:
+                    continue
 
-            key = (symbol, label, result["candle_time"])
-            if key in seen_keys:
-                continue
-
-            alert = {
-                "symbol": symbol,
-                "timeframe": label,
-                "direction": result["direction"],
-                "close": result["close"],
-                "candle_time": result["candle_time"],
-                "detected_at": datetime.now(timezone.utc).isoformat(),
-            }
-            new_alerts.append(alert)
-            seen_keys.add(key)
+                alert = {
+                    "symbol": symbol,
+                    "timeframe": label,
+                    "direction": result["direction"],
+                    "close": result["close"],
+                    "candle_time": result["candle_time"],
+                    "detected_at": datetime.now(timezone.utc).isoformat(),
+                }
+                new_alerts.append(alert)
+                seen_keys.add(key)
 
     if new_alerts:
         combined = new_alerts + existing
-        combined = combined[:200]  # keep the file small
+        # newest candle_time first
+        combined.sort(key=lambda a: a["candle_time"], reverse=True)
+        combined = combined[:300]  # keep the file a reasonable size
         save_alerts(combined)
 
     return new_alerts
