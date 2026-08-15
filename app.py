@@ -16,7 +16,7 @@ st.set_page_config(page_title="NSE Pattern Scanner", layout="wide", page_icon="ð
 # brass/gold accent standing in for the exchange bell, muted up/down colors
 # (not neon), Space Grotesk for headers, IBM Plex Mono for every number so
 # prices actually read like a ticker.
-  st.markdown("""
+st.markdown("""
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
