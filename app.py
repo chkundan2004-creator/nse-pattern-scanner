@@ -17,10 +17,10 @@ st.set_page_config(page_title="NSE Pattern Scanner", layout="wide", page_icon="ð
 # (not neon), Space Grotesk for headers, IBM Plex Mono for every number so
 # prices actually read like a ticker.
 st.markdown(
-    """
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <style>
+  st.markdown("""
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
     :root {
         --ink-950: #0A0C10;
         --ink-900: #12151B;
@@ -125,9 +125,10 @@ st.markdown(
     .empty-state {
         color: var(--text-500); font-size: 0.9em; padding: 14px 0; font-style: italic;
     }
-    </style>
-    """,
-    unsafe_allow_html=True,
+   </style>
+""",
+unsafe_allow_html=True,
+)
 )
 
 st.markdown(
