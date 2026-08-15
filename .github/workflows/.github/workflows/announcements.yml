@@ -1,0 +1,32 @@
+name: NSE announcements poll
+
+on:
+  schedule:
+    # Every 5 minutes, around the clock — announcements can land outside
+    # market hours too (e.g. board meeting outcomes after close).
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install -r requirements.txt
+
+      - run: python announcements.py
+
+      - name: Commit announcements.json if changed
+        run: |
+          git config user.name "nse-scanner-bot"
+          git config user.email "actions@github.com"
+          if ! git diff --quiet announcements.json; then
+            git add announcements.json
+            git commit -m "Update announcements"
+            git push
+          fi
