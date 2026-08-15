@@ -18,140 +18,216 @@ st.set_page_config(page_title="NSE Pattern Scanner", layout="wide", page_icon="�
 # prices actually read like a ticker.
 st.markdown(
     """
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap');
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+    :root {
+        --ink-950: #08090D;
+        --ink-900: #10131A;
+        --ink-850: #161A22;
+        --ink-800: #1C212B;
+        --line-700: #262B36;
+        --line-600: #333A47;
+        --gold-500: #C9A24B;
+        --gold-300: #E9CE8C;
+        --gold-glow: rgba(201,162,75,0.18);
+        --mint-500: #3EAE7A;
+        --mint-300: #7ED3AA;
+        --mint-glow: rgba(62,174,122,0.16);
+        --coral-500: #D9636B;
+        --coral-300: #EB9BA0;
+        --coral-glow: rgba(217,99,107,0.16);
+        --blue-500: #5B8DB8;
+        --text-100: #F2F3F6;
+        --text-500: #8A90A0;
+        --text-600: #676D7C;
+    }
 
-:root {
-  --ink-950: #0A0C10;
-  --ink-900: #12151B;
-  --ink-800: #1B1F27;
-  --line-700: #262B35;
-  --gold-500: #C9A24B;
-  --gold-300: #E4C87A;
-  --mint-500: #3EAE7A;
-  --mint-300: #7ED3AA;
-  --coral-500: #D9636B;
-  --coral-300: #EB9BA0;
-  --text-100: #EDEEF2;
-  --text-500: #8A90A0;
-}
+    #MainMenu, footer, header[data-testid="stHeader"] { visibility: hidden; }
 
-#MainMenu, footer { visibility: hidden; }
+    .stApp {
+        background:
+            radial-gradient(ellipse 900px 400px at 15% -10%, var(--gold-glow) 0%, transparent 60%),
+            var(--ink-950);
+    }
+    body, .stApp, p, div, span, label { font-family: 'Inter', sans-serif; color: var(--text-100); }
+    h1, h2, h3 { font-family: 'Space Grotesk', sans-serif !important; font-weight: 700 !important; letter-spacing: -0.015em; }
+    .mono { font-family: 'IBM Plex Mono', monospace; }
+    .block-container { padding-top: 2.2rem !important; max-width: 1180px; }
 
-.stApp {
-  background-color: var(--ink-950);
-}
+    /* --- Masthead --- */
+    .masthead-wrap { margin-bottom: 26px; }
+    .eyebrow {
+        font-family: 'IBM Plex Mono', monospace; font-size: 0.72em; letter-spacing: 0.16em;
+        text-transform: uppercase; color: var(--gold-500); margin-bottom: 6px;
+    }
+    .masthead { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+    .masthead h1 {
+        font-size: 2.1em !important; margin: 0 !important;
+        background: linear-gradient(90deg, var(--text-100) 30%, var(--gold-300) 100%);
+        -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .masthead .bell {
+        font-size: 1.3em; filter: drop-shadow(0 0 10px var(--gold-glow));
+    }
+    .subtitle { color: var(--text-500); font-size: 0.95em; margin-bottom: 24px; }
 
-body, .stApp, p, div, span, label {
-  font-family: 'Inter', sans-serif;
-  color: var(--text-100);
-}
+    /* --- Pulse strip: signature element --- */
+    .pulse-strip {
+        display: flex; gap: 0; border: 1px solid var(--line-700);
+        border-radius: 14px; overflow: hidden; margin-bottom: 28px;
+        background: linear-gradient(180deg, var(--ink-850) 0%, var(--ink-900) 100%);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    .pulse-cell {
+        flex: 1; padding: 16px 20px; border-right: 1px solid var(--line-700);
+        transition: background-color 0.15s ease; position: relative;
+    }
+    .pulse-cell:hover { background-color: rgba(201,162,75,0.05); }
+    .pulse-cell:last-child { border-right: none; }
+    .pulse-label {
+        font-family: 'IBM Plex Mono', monospace; font-size: 0.7em; letter-spacing: 0.1em;
+        color: var(--text-600); text-transform: uppercase; margin-bottom: 6px;
+    }
+    .pulse-value {
+        font-family: 'IBM Plex Mono', monospace; font-size: 1.9em; font-weight: 600; color: var(--gold-300);
+        line-height: 1;
+    }
 
-h1, h2, h3 {
-  font-family: 'Space Grotesk', sans-serif !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.01em;
-}
+    /* --- Section headers --- */
+    .section-head { display: flex; align-items: baseline; gap: 10px; margin: 28px 0 12px 0; }
+    .section-head h3 { margin: 0 !important; font-size: 1.15em !important; }
+    .section-head .count {
+        font-family: 'IBM Plex Mono', monospace; font-size: 0.75em; color: var(--text-600);
+        background: var(--ink-850); border: 1px solid var(--line-700); border-radius: 20px;
+        padding: 1px 9px;
+    }
 
-.mono {
-  font-family: 'IBM Plex Mono', monospace;
-}
+    /* --- Sidebar --- */
+    section[data-testid="stSidebar"] {
+        background-color: var(--ink-900); border-right: 1px solid var(--line-700);
+    }
+    section[data-testid="stSidebar"] h2 {
+        font-family: 'IBM Plex Mono', monospace !important; font-size: 0.8em !important;
+        letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold-500) !important;
+        border-bottom: 1px solid var(--line-700); padding-bottom: 10px; margin-bottom: 14px !important;
+    }
 
-/* --- Header / masthead --- */
-.masthead { display: flex; align-items: baseline; gap: 10px; margin-bottom: 2px; }
-.masthead .bell { color: var(--gold-500); }
-.subtitle { color: var(--text-500); font-size: 0.92em; margin-bottom: 18px; }
+    /* --- Tabs, restyled as a segmented control --- */
+    div[data-baseweb="tab-list"] { gap: 6px; border-bottom: 1px solid var(--line-700); margin-bottom: 4px; }
+    button[data-baseweb="tab"] {
+        font-family: 'Inter', sans-serif; font-weight: 500; color: var(--text-500);
+        background-color: transparent; border-radius: 8px 8px 0 0; transition: color 0.15s ease;
+    }
+    button[data-baseweb="tab"]:hover { color: var(--gold-300); }
+    button[data-baseweb="tab"][aria-selected="true"] {
+        color: var(--gold-300); border-bottom: 2px solid var(--gold-500);
+    }
 
-/* --- Pulse strip: the signature element, a terminal-style status row --- */
-.pulse-strip {
-  display: flex; gap: 0; border: 1px solid var(--line-700);
-  border-radius: 10px; overflow: hidden; margin-bottom: 22px;
-  background: linear-gradient(180deg, var(--ink-900) 0%, var(--ink-950) 100%);
-}
-.pulse-cell {
-  flex: 1; padding: 12px 18px; border-right: 1px solid var(--line-700);
-}
-.pulse-cell:last-child { border-right: none; }
-.pulse-label {
-  font-family: 'IBM Plex Mono', monospace; font-size: 0.7em; letter-spacing: 0.08em;
-  color: var(--text-500); text-transform: uppercase; margin-bottom: 4px;
-}
-.pulse-value {
-  font-family: 'IBM Plex Mono', monospace; font-size: 1.5em; font-weight: 600; color: var(--gold-300);
-}
+    /* --- Buttons --- */
+    div[data-testid="stButton"] button {
+        border-radius: 7px; border: 1px solid var(--line-700); background-color: var(--ink-800);
+        color: var(--text-100); font-size: 0.83em; transition: all 0.15s ease;
+    }
+    div[data-testid="stButton"] button:hover {
+        border-color: var(--gold-500); color: var(--gold-300); background-color: var(--ink-850);
+        box-shadow: 0 0 0 1px var(--gold-500);
+    }
 
-/* --- Sidebar --- */
-section[data-testid="stSidebar"] { background-color: var(--ink-900); border-right: 1px solid var(--line-700); }
-section[data-testid="stSidebar"] h2 {
-  font-family: 'IBM Plex Mono', monospace !important; font-size: 0.85em !important;
-  letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-500) !important;
-  border-bottom: 1px solid var(--line-700); padding-bottom: 8px;
-}
+    /* --- Cards --- */
+    .card {
+        background: linear-gradient(180deg, var(--ink-850) 0%, var(--ink-900) 100%);
+        border: 1px solid var(--line-700);
+        border-left: 3px solid var(--line-600);
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-bottom: 10px;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        height: 100%;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(0,0,0,0.4);
+        border-color: var(--line-600);
+    }
+    .card.bullish { border-left-color: var(--mint-500); }
+    .card.bullish:hover { box-shadow: 0 10px 24px rgba(0,0,0,0.4), 0 0 0 1px var(--mint-glow); }
+    .card.bearish { border-left-color: var(--coral-500); }
+    .card.bearish:hover { box-shadow: 0 10px 24px rgba(0,0,0,0.4), 0 0 0 1px var(--coral-glow); }
+    .card.squeeze-active { border-left-color: var(--gold-500); }
+    .card.squeeze-active:hover { box-shadow: 0 10px 24px rgba(0,0,0,0.4), 0 0 0 1px var(--gold-glow); }
+    .card.squeeze-inactive { border-left-color: var(--line-700); opacity: 0.6; }
+    .card.announcement { border-left-color: var(--blue-500); }
+    .card .sym { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.05em; }
+    .card .meta { color: var(--text-500); font-size: 0.82em; margin-top: 5px; line-height: 1.5; }
+    .card .meta .mono { color: var(--text-500); }
 
-/* --- Tabs, restyled as a segmented control --- */
-div[data-baseweb="tab-list"] { gap: 4px; border-bottom: 1px solid var(--line-700); }
-button[data-baseweb="tab"] {
-  font-family: 'Inter', sans-serif; font-weight: 500; color: var(--text-500);
-  background-color: transparent; border-radius: 8px 8px 0 0;
-}
-button[data-baseweb="tab"][aria-selected="true"] {
-  color: var(--gold-300); border-bottom: 2px solid var(--gold-500);
-}
+    div[data-testid="column"] { padding: 0 6px !important; }
 
-/* --- Buttons --- */
-div[data-testid="stButton"] button {
-  border-radius: 7px; border: 1px solid var(--line-700); background-color: var(--ink-800);
-  color: var(--text-100); font-size: 0.85em;
-}
-div[data-testid="stButton"] button:hover { border-color: var(--gold-500); color: var(--gold-300); }
+    /* --- Badges --- */
+    .badge {
+        display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 0.66em;
+        letter-spacing: 0.07em; text-transform: uppercase; padding: 3px 9px; border-radius: 20px;
+        margin-left: 7px; vertical-align: middle;
+    }
+    .badge.bullish { background: var(--mint-glow); color: var(--mint-300); }
+    .badge.bearish { background: var(--coral-glow); color: var(--coral-300); }
+    .badge.active { background: var(--gold-glow); color: var(--gold-300); }
+    .badge.idle { background: rgba(138,144,160,0.1); color: var(--text-600); }
 
-/* --- Cards --- */
-.card {
-  background-color: var(--ink-900);
-  border: 1px solid var(--line-700);
-  border-left: 3px solid var(--line-700);
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 8px;
-  transition: border-color 0.15s ease;
-}
-.card:hover { border-color: var(--gold-500); }
-.card.bullish { border-left-color: var(--mint-500); }
-.card.bearish { border-left-color: var(--coral-500); }
-.card.squeeze-active { border-left-color: var(--gold-500); }
-.card.squeeze-inactive { border-left-color: var(--line-700); opacity: 0.65; }
-.card.announcement { border-left-color: #5B8DB8; }
-.card .sym { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.02em; }
-.card .meta { color: var(--text-500); font-size: 0.82em; margin-top: 3px; }
-.card .meta .mono { color: var(--text-500); }
+    .empty-state {
+        color: var(--text-600); font-size: 0.88em; padding: 22px 18px; font-style: italic;
+        background: var(--ink-900); border: 1px dashed var(--line-700); border-radius: 10px;
+        text-align: center;
+    }
 
-/* --- Badges --- */
-.badge {
-  display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 0.68em;
-  letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 20px;
-  margin-left: 6px; vertical-align: middle;
-}
-.badge.bullish { background: rgba(62,174,122,0.15); color: var(--mint-300); }
-.badge.bearish { background: rgba(217,99,107,0.15); color: var(--coral-300); }
-.badge.active { background: rgba(201,162,75,0.15); color: var(--gold-300); }
-.badge.idle { background: rgba(138,144,160,0.12); color: var(--text-500); }
+    a.card-link { text-decoration: none; color: inherit; display: block; height: 100%; }
+    a.card-link .card { cursor: pointer; }
+    a.card-link:hover .card { border-color: var(--line-600); }
 
-.empty-state {
-  color: var(--text-500); font-size: 0.9em; padding: 14px 0; font-style: italic;
-}
+    /* --- Form inputs: fix the dark-text-on-white-box bug --- */
+    div[data-testid="stTextArea"] textarea,
+    div[data-testid="stTextInput"] input,
+    div[data-testid="stNumberInput"] input {
+        background-color: var(--ink-800) !important;
+        color: var(--text-100) !important;
+        border: 1px solid var(--line-700) !important;
+        font-family: 'IBM Plex Mono', monospace !important;
+        border-radius: 7px !important;
+    }
+    div[data-testid="stTextArea"] textarea:focus,
+    div[data-testid="stTextInput"] input:focus,
+    div[data-testid="stNumberInput"] input:focus {
+        border-color: var(--gold-500) !important; box-shadow: 0 0 0 1px var(--gold-500) !important;
+    }
+    div[data-testid="stTextArea"] textarea::placeholder,
+    div[data-testid="stTextInput"] input::placeholder {
+        color: var(--text-600) !important;
+    }
+    div[data-baseweb="select"] > div {
+        background-color: var(--ink-800) !important;
+        border-color: var(--line-700) !important;
+        border-radius: 7px !important;
+    }
+    div[data-baseweb="select"] * { color: var(--text-100) !important; }
+    div[data-baseweb="popover"] ul {
+        background-color: var(--ink-900) !important;
+        border: 1px solid var(--line-700) !important;
+    }
+    div[data-baseweb="popover"] li:hover { background-color: var(--ink-800) !important; }
 
-a.card-link { text-decoration: none; color: inherit; display: block; }
-a.card-link .card { cursor: pointer; }
-a.card-link:hover .card { border-color: var(--gold-500); }
-</style>
-""",
-     unsafe_allow_html=True,
-)
-st.markdown("""<div class="masthead"><span class="bell">🔔</span><h1>NSE Pattern Scanner</h1></div>""",
+    hr { border-color: var(--line-700) !important; margin: 26px 0 !important; }
+    </style>
+    """,
     unsafe_allow_html=True,
 )
+
 st.markdown(
-    '<div class="subtitle">Squeeze → breakout scanner across 5m / 15m / 1h / 1D · free data via yfinance, a few minutes delayed</div>',
+    """<div class="masthead-wrap">
+    <div class="eyebrow">Live · NSE · Pattern intelligence</div>
+    <div class="masthead"><span class="bell">🔔</span><h1>NSE Pattern Scanner</h1></div>
+    <div class="subtitle">Squeeze → breakout scanner across 5m / 15m / 1h / 1D · free data via yfinance, a few minutes delayed</div>
+    </div>""",
     unsafe_allow_html=True,
 )
 
@@ -278,11 +354,36 @@ def render_squeeze_section(source):
             if not rows:
                 st.markdown(f'<div class="empty-state">Nothing pinned on the {label} timeframe right now.</div>', unsafe_allow_html=True)
                 continue
+
+            if source == "tracking":
+                # 2-column grid — a real dashboard feel instead of a stacked list
+                grid = st.columns(2)
+                for i, s in enumerate(rows):
+                    with grid[i % 2]:
+                        status_label = "SQUEEZING" if s["still_active"] else "IDLE"
+                        status_class = "active" if s["still_active"] else "idle"
+                        css_class = "squeeze-active" if s["still_active"] else "squeeze-inactive"
+                        st.markdown(
+                            f"""<a class="card-link" href="{chart_url(s['symbol'], s['timeframe'])}" target="_blank">
+                            <div class="card {css_class}">
+                            <span class="sym">{s['symbol']}</span><span class="badge {status_class}">{status_label}</span>
+                            <div class="meta">range <span class="mono">₹{s['squeeze_low']}–₹{s['squeeze_high']}</span>
+                            &nbsp;·&nbsp; last close <span class="mono">₹{s['last_close']}</span>
+                            &nbsp;·&nbsp; tightness <span class="mono">{s['tightness_ratio']}</span>
+                            &nbsp;·&nbsp; as of {s['as_of']}</div>
+                            </div></a>""",
+                            unsafe_allow_html=True,
+                        )
+                        if st.button("Remove", key=f"remove_{s['symbol']}_{s['timeframe']}"):
+                            scanner.remove_pinned_squeeze(s["symbol"], s["timeframe"])
+                            st.rerun()
+                continue
+
             for s in rows:
                 status_label = "SQUEEZING" if s["still_active"] else "IDLE"
                 status_class = "active" if s["still_active"] else "idle"
                 css_class = "squeeze-active" if s["still_active"] else "squeeze-inactive"
-                cols = st.columns([5, 1, 1]) if source == "universe" else st.columns([6, 1])
+                cols = st.columns([5, 1, 1])
                 with cols[0]:
                     st.markdown(
                         f"""<a class="card-link" href="{chart_url(s['symbol'], s['timeframe'])}" target="_blank">
@@ -295,20 +396,14 @@ def render_squeeze_section(source):
                         </div></a>""",
                         unsafe_allow_html=True,
                     )
-                if source == "universe":
-                    with cols[1]:
-                        if st.button("Add to tracking", key=f"add_{s['symbol']}_{s['timeframe']}"):
-                            scanner.add_to_watchlist(s["symbol"])
-                            st.success(f"Added {s['symbol']}")
-                    with cols[2]:
-                        if st.button("Remove", key=f"remove_{s['symbol']}_{s['timeframe']}"):
-                            scanner.remove_pinned_squeeze(s["symbol"], s["timeframe"])
-                            st.rerun()
-                else:
-                    with cols[1]:
-                        if st.button("Remove", key=f"remove_{s['symbol']}_{s['timeframe']}"):
-                            scanner.remove_pinned_squeeze(s["symbol"], s["timeframe"])
-                            st.rerun()
+                with cols[1]:
+                    if st.button("Add to tracking", key=f"add_{s['symbol']}_{s['timeframe']}"):
+                        scanner.add_to_watchlist(s["symbol"])
+                        st.success(f"Added {s['symbol']}")
+                with cols[2]:
+                    if st.button("Remove", key=f"remove_{s['symbol']}_{s['timeframe']}"):
+                        scanner.remove_pinned_squeeze(s["symbol"], s["timeframe"])
+                        st.rerun()
 
 
 def render_alert_section(source):
@@ -320,9 +415,26 @@ def render_alert_section(source):
             if not rows:
                 st.markdown(f'<div class="empty-state">No {label} alerts yet.</div>', unsafe_allow_html=True)
                 continue
+
+            if source == "tracking":
+                grid = st.columns(2)
+                for i, a in enumerate(rows):
+                    badge_class = "bullish" if a["direction"] == "bullish" else "bearish"
+                    with grid[i % 2]:
+                        st.markdown(
+                            f"""<a class="card-link" href="{chart_url(a['symbol'], a['timeframe'])}" target="_blank">
+                            <div class="card {a['direction']}">
+                            <span class="sym">{a['symbol']}</span><span class="badge {badge_class}">{a['direction']}</span>
+                            <div class="meta">breakout near <span class="mono">₹{a['close']}</span>
+                            &nbsp;·&nbsp; candle {a['candle_time']}</div>
+                            </div></a>""",
+                            unsafe_allow_html=True,
+                        )
+                continue
+
             for a in rows:
                 badge_class = "bullish" if a["direction"] == "bullish" else "bearish"
-                cols = st.columns([5, 1]) if source == "universe" else [st.container()]
+                cols = st.columns([5, 1])
                 with cols[0]:
                     st.markdown(
                         f"""<a class="card-link" href="{chart_url(a['symbol'], a['timeframe'])}" target="_blank">
@@ -333,11 +445,17 @@ def render_alert_section(source):
                         </div></a>""",
                         unsafe_allow_html=True,
                     )
-                if source == "universe":
-                    with cols[1]:
-                        if st.button("Add to tracking", key=f"addalert_{a['symbol']}_{a['timeframe']}_{a['candle_time']}"):
-                            scanner.add_to_watchlist(a["symbol"])
-                            st.success(f"Added {a['symbol']}")
+                with cols[1]:
+                    if st.button("Add to tracking", key=f"addalert_{a['symbol']}_{a['timeframe']}_{a['candle_time']}"):
+                        scanner.add_to_watchlist(a["symbol"])
+                        st.success(f"Added {a['symbol']}")
+
+
+def section_head(title, count):
+    st.markdown(
+        f'<div class="section-head"><h3>{title}</h3><span class="count">{count}</span></div>',
+        unsafe_allow_html=True,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -347,22 +465,24 @@ view_tabs = st.tabs(["My tracking list", "NSE universe (₹1500cr+)", "Fundament
 
 with view_tabs[0]:
     st.caption("Your own curated list — the source of truth for what you're actively watching.")
-    st.subheader("Company announcements")
+    section_head("Company announcements", len(all_announcements))
     if not all_announcements:
         st.markdown('<div class="empty-state">No announcements yet for your tracking-list companies.</div>', unsafe_allow_html=True)
     else:
-        for a in all_announcements:
-            st.markdown(
-                f"""<a class="card-link" href="{chart_url(a['symbol'])}" target="_blank">
-                <div class="card announcement">
-                <span class="sym">{a['symbol']}</span>
-                <div class="meta">{a['subject']}<br>{a['date']}</div>
-                </div></a>""",
-                unsafe_allow_html=True,
-            )
-    st.subheader("Currently squeezing")
+        grid = st.columns(2)
+        for i, a in enumerate(all_announcements):
+            with grid[i % 2]:
+                st.markdown(
+                    f"""<a class="card-link" href="{chart_url(a['symbol'])}" target="_blank">
+                    <div class="card announcement">
+                    <span class="sym">{a['symbol']}</span>
+                    <div class="meta">{a['subject']}<br>{a['date']}</div>
+                    </div></a>""",
+                    unsafe_allow_html=True,
+                )
+    section_head("Currently squeezing", sum(1 for p in pinned if p["source"] == "tracking"))
     render_squeeze_section("tracking")
-    st.subheader("Alerts")
+    section_head("Alerts", sum(1 for a in alerts if a["source"] == "tracking"))
     render_alert_section("tracking")
 
 with view_tabs[1]:
@@ -370,9 +490,9 @@ with view_tabs[1]:
         "Auto-built weekly from NSE's largest ~500 stocks, filtered to market cap ≥ ₹1500cr. "
         "Scanned the same way as your tracking list — click 'Add to tracking' on any setup you like."
     )
-    st.subheader("Currently squeezing")
+    section_head("Currently squeezing", sum(1 for p in pinned if p["source"] == "universe"))
     render_squeeze_section("universe")
-    st.subheader("Alerts")
+    section_head("Alerts", sum(1 for a in alerts if a["source"] == "universe"))
     render_alert_section("universe")
 
 with view_tabs[2]:
