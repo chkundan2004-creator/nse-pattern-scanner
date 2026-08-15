@@ -18,124 +18,136 @@ st.set_page_config(page_title="NSE Pattern Scanner", layout="wide", page_icon="�
 # prices actually read like a ticker.
 st.markdown(
     """
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-    :root {
-        --ink-950: #0A0C10;
-        --ink-900: #12151B;
-        --ink-800: #1B1F27;
-        --line-700: #262B35;
-        --gold-500: #C9A24B;
-        --gold-300: #E4C87A;
-        --mint-500: #3EAE7A;
-        --mint-300: #7ED3AA;
-        --coral-500: #D9636B;
-        --coral-300: #EB9BA0;
-        --text-100: #EDEEF2;
-        --text-500: #8A90A0;
-    }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap');
 
-    #MainMenu, footer { visibility: hidden; }
+:root {
+  --ink-950: #0A0C10;
+  --ink-900: #12151B;
+  --ink-800: #1B1F27;
+  --line-700: #262B35;
+  --gold-500: #C9A24B;
+  --gold-300: #E4C87A;
+  --mint-500: #3EAE7A;
+  --mint-300: #7ED3AA;
+  --coral-500: #D9636B;
+  --coral-300: #EB9BA0;
+  --text-100: #EDEEF2;
+  --text-500: #8A90A0;
+}
 
-    .stApp { background-color: var(--ink-950); }
-    body, .stApp, p, div, span, label { font-family: 'Inter', sans-serif; color: var(--text-100); }
-    h1, h2, h3 { font-family: 'Space Grotesk', sans-serif !important; font-weight: 700 !important; letter-spacing: -0.01em; }
-    .mono { font-family: 'IBM Plex Mono', monospace; }
+#MainMenu, footer { visibility: hidden; }
 
-    /* --- Header / masthead --- */
-    .masthead { display: flex; align-items: baseline; gap: 10px; margin-bottom: 2px; }
-    .masthead .bell { color: var(--gold-500); }
-    .subtitle { color: var(--text-500); font-size: 0.92em; margin-bottom: 18px; }
+.stApp {
+  background-color: var(--ink-950);
+}
 
-    /* --- Pulse strip: the signature element, a terminal-style status row --- */
-    .pulse-strip {
-        display: flex; gap: 0; border: 1px solid var(--line-700);
-        border-radius: 10px; overflow: hidden; margin-bottom: 22px;
-        background: linear-gradient(180deg, var(--ink-900) 0%, var(--ink-950) 100%);
-    }
-    .pulse-cell {
-        flex: 1; padding: 12px 18px; border-right: 1px solid var(--line-700);
-    }
-    .pulse-cell:last-child { border-right: none; }
-    .pulse-label {
-        font-family: 'IBM Plex Mono', monospace; font-size: 0.7em; letter-spacing: 0.08em;
-        color: var(--text-500); text-transform: uppercase; margin-bottom: 4px;
-    }
-    .pulse-value {
-        font-family: 'IBM Plex Mono', monospace; font-size: 1.5em; font-weight: 600; color: var(--gold-300);
-    }
+body, .stApp, p, div, span, label {
+  font-family: 'Inter', sans-serif;
+  color: var(--text-100);
+}
 
-    /* --- Sidebar --- */
-    section[data-testid="stSidebar"] { background-color: var(--ink-900); border-right: 1px solid var(--line-700); }
-    section[data-testid="stSidebar"] h2 {
-        font-family: 'IBM Plex Mono', monospace !important; font-size: 0.85em !important;
-        letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-500) !important;
-        border-bottom: 1px solid var(--line-700); padding-bottom: 8px;
-    }
+h1, h2, h3 {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em;
+}
 
-    /* --- Tabs, restyled as a segmented control --- */
-    div[data-baseweb="tab-list"] { gap: 4px; border-bottom: 1px solid var(--line-700); }
-    button[data-baseweb="tab"] {
-        font-family: 'Inter', sans-serif; font-weight: 500; color: var(--text-500);
-        background-color: transparent; border-radius: 8px 8px 0 0;
-    }
-    button[data-baseweb="tab"][aria-selected="true"] {
-        color: var(--gold-300); border-bottom: 2px solid var(--gold-500);
-    }
+.mono {
+  font-family: 'IBM Plex Mono', monospace;
+}
 
-    /* --- Buttons --- */
-    div[data-testid="stButton"] button {
-        border-radius: 7px; border: 1px solid var(--line-700); background-color: var(--ink-800);
-        color: var(--text-100); font-size: 0.85em;
-    }
-    div[data-testid="stButton"] button:hover { border-color: var(--gold-500); color: var(--gold-300); }
+/* --- Header / masthead --- */
+.masthead { display: flex; align-items: baseline; gap: 10px; margin-bottom: 2px; }
+.masthead .bell { color: var(--gold-500); }
+.subtitle { color: var(--text-500); font-size: 0.92em; margin-bottom: 18px; }
 
-    /* --- Cards --- */
-    .card {
-        background-color: var(--ink-900);
-        border: 1px solid var(--line-700);
-        border-left: 3px solid var(--line-700);
-        border-radius: 8px;
-        padding: 12px 16px;
-        margin-bottom: 8px;
-        transition: border-color 0.15s ease;
-    }
-    .card:hover { border-color: var(--gold-500); }
-    .card.bullish { border-left-color: var(--mint-500); }
-    .card.bearish { border-left-color: var(--coral-500); }
-    .card.squeeze-active { border-left-color: var(--gold-500); }
-    .card.squeeze-inactive { border-left-color: var(--line-700); opacity: 0.65; }
-    .card.announcement { border-left-color: #5B8DB8; }
-    .card .sym { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.02em; }
-    .card .meta { color: var(--text-500); font-size: 0.82em; margin-top: 3px; }
-    .card .meta .mono { color: var(--text-500); }
+/* --- Pulse strip: the signature element, a terminal-style status row --- */
+.pulse-strip {
+  display: flex; gap: 0; border: 1px solid var(--line-700);
+  border-radius: 10px; overflow: hidden; margin-bottom: 22px;
+  background: linear-gradient(180deg, var(--ink-900) 0%, var(--ink-950) 100%);
+}
+.pulse-cell {
+  flex: 1; padding: 12px 18px; border-right: 1px solid var(--line-700);
+}
+.pulse-cell:last-child { border-right: none; }
+.pulse-label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.7em; letter-spacing: 0.08em;
+  color: var(--text-500); text-transform: uppercase; margin-bottom: 4px;
+}
+.pulse-value {
+  font-family: 'IBM Plex Mono', monospace; font-size: 1.5em; font-weight: 600; color: var(--gold-300);
+}
 
-    /* --- Badges --- */
-    .badge {
-        display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 0.68em;
-        letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 20px;
-        margin-left: 6px; vertical-align: middle;
-    }
-    .badge.bullish { background: rgba(62,174,122,0.15); color: var(--mint-300); }
-    .badge.bearish { background: rgba(217,99,107,0.15); color: var(--coral-300); }
-    .badge.active { background: rgba(201,162,75,0.15); color: var(--gold-300); }
-    .badge.idle { background: rgba(138,144,160,0.12); color: var(--text-500); }
+/* --- Sidebar --- */
+section[data-testid="stSidebar"] { background-color: var(--ink-900); border-right: 1px solid var(--line-700); }
+section[data-testid="stSidebar"] h2 {
+  font-family: 'IBM Plex Mono', monospace !important; font-size: 0.85em !important;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-500) !important;
+  border-bottom: 1px solid var(--line-700); padding-bottom: 8px;
+}
 
-    .empty-state {
-        color: var(--text-500); font-size: 0.9em; padding: 14px 0; font-style: italic;
-    }
+/* --- Tabs, restyled as a segmented control --- */
+div[data-baseweb="tab-list"] { gap: 4px; border-bottom: 1px solid var(--line-700); }
+button[data-baseweb="tab"] {
+  font-family: 'Inter', sans-serif; font-weight: 500; color: var(--text-500);
+  background-color: transparent; border-radius: 8px 8px 0 0;
+}
+button[data-baseweb="tab"][aria-selected="true"] {
+  color: var(--gold-300); border-bottom: 2px solid var(--gold-500);
+}
 
-    a.card-link { text-decoration: none; color: inherit; display: block; }
-    a.card-link .card { cursor: pointer; }
-    a.card-link:hover .card { border-color: var(--gold-500); }
-    </style>
-    """,
-    unsafe_allow_html=True,
+/* --- Buttons --- */
+div[data-testid="stButton"] button {
+  border-radius: 7px; border: 1px solid var(--line-700); background-color: var(--ink-800);
+  color: var(--text-100); font-size: 0.85em;
+}
+div[data-testid="stButton"] button:hover { border-color: var(--gold-500); color: var(--gold-300); }
+
+/* --- Cards --- */
+.card {
+  background-color: var(--ink-900);
+  border: 1px solid var(--line-700);
+  border-left: 3px solid var(--line-700);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  transition: border-color 0.15s ease;
+}
+.card:hover { border-color: var(--gold-500); }
+.card.bullish { border-left-color: var(--mint-500); }
+.card.bearish { border-left-color: var(--coral-500); }
+.card.squeeze-active { border-left-color: var(--gold-500); }
+.card.squeeze-inactive { border-left-color: var(--line-700); opacity: 0.65; }
+.card.announcement { border-left-color: #5B8DB8; }
+.card .sym { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.02em; }
+.card .meta { color: var(--text-500); font-size: 0.82em; margin-top: 3px; }
+.card .meta .mono { color: var(--text-500); }
+
+/* --- Badges --- */
+.badge {
+  display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 0.68em;
+  letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 20px;
+  margin-left: 6px; vertical-align: middle;
+}
+.badge.bullish { background: rgba(62,174,122,0.15); color: var(--mint-300); }
+.badge.bearish { background: rgba(217,99,107,0.15); color: var(--coral-300); }
+.badge.active { background: rgba(201,162,75,0.15); color: var(--gold-300); }
+.badge.idle { background: rgba(138,144,160,0.12); color: var(--text-500); }
+
+.empty-state {
+  color: var(--text-500); font-size: 0.9em; padding: 14px 0; font-style: italic;
+}
+
+a.card-link { text-decoration: none; color: inherit; display: block; }
+a.card-link .card { cursor: pointer; }
+a.card-link:hover .card { border-color: var(--gold-500); }
+</style>
+""",
+     unsafe_allow_html=True,
 )
-
-st.markdown(
-    """<div class="masthead"><span class="bell">🔔</span><h1>NSE Pattern Scanner</h1></div>""",
+st.markdown("""<div class="masthead"><span class="bell">🔔</span><h1>NSE Pattern Scanner</h1></div>""",
     unsafe_allow_html=True,
 )
 st.markdown(
