@@ -128,7 +128,6 @@ st.markdown("""
 """,
 unsafe_allow_html=True,
 )
-)
 
 st.markdown(
     """<div class="masthead"><span class="bell">🔔</span><h1>NSE Pattern Scanner</h1></div>""",
