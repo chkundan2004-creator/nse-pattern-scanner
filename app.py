@@ -68,7 +68,7 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif !important; font-weight: 7
 }
 .subtitle { color: var(--text-500); font-size: 0.95em; margin-bottom: 24px; }
 
-/* --- Pulse strip: signature element --- */
+/* --- Pulse strip --- */
 .pulse-strip {
   display: flex; gap: 0; border: 1px solid var(--line-700);
   border-radius: 14px; overflow: hidden; margin-bottom: 28px;
@@ -109,7 +109,7 @@ section[data-testid="stSidebar"] h2 {
   border-bottom: 1px solid var(--line-700); padding-bottom: 10px; margin-bottom: 14px !important;
 }
 
-/* --- Tabs, restyled as a segmented control --- */
+/* --- Tabs --- */
 div[data-baseweb="tab-list"] { gap: 6px; border-bottom: 1px solid var(--line-700); margin-bottom: 4px; }
 button[data-baseweb="tab"] {
   font-family: 'Inter', sans-serif; font-weight: 500; color: var(--text-500);
@@ -181,7 +181,7 @@ a.card-link { text-decoration: none; color: inherit; display: block; height: 100
 a.card-link .card { cursor: pointer; }
 a.card-link:hover .card { border-color: var(--line-600); }
 
-/* --- Form inputs: fix the dark-text-on-white-box bug --- */
+/* --- Form inputs --- */
 div[data-testid="stTextArea"] textarea,
 div[data-testid="stTextInput"] input,
 div[data-testid="stNumberInput"] input {
@@ -223,7 +223,7 @@ st.markdown(
 )
 
 # ---------------------------------------------------------------------------
-# Sidebar: Tracking list manager
+# Sidebar
 # ---------------------------------------------------------------------------
 st.sidebar.header("Tracking List")
 current_list = scanner.load_tracking_list()
@@ -245,10 +245,8 @@ if st.sidebar.button("Run scan now"):
         scanner.run_full_scan()
     st.rerun()
 
-# Auto-refresh main dashboard every 30 seconds
 st_autorefresh(interval=30000, key="datarefresh")
 
-# Desktop Notifications JS Bridge
 components.html(
     """
     <script>
@@ -274,7 +272,7 @@ al_count = len(alerts_data)
 an_count = len(anns_data)
 
 # ---------------------------------------------------------------------------
-# Pulse strip: key metrics at a glance
+# Pulse strip
 # ---------------------------------------------------------------------------
 st.markdown(
     f"""
@@ -300,14 +298,12 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Main Tab Structure
 tabs = st.tabs(["Tracking List", "NSE Universe", "Fundamentals"])
 
 # ===========================================================================
 # TAB 1: Tracking List
 # ===========================================================================
 with tabs[0]:
-    # --- Section: Active Squeezes ---
     st.markdown(
         f'<div class="section-head"><h3>TTM Squeeze Status</h3><span class="count">{sq_count} active</span></div>',
         unsafe_allow_html=True,
@@ -350,7 +346,6 @@ with tabs[0]:
                         unsafe_allow_html=True,
                     )
 
-    # --- Section: Alerts ---
     st.markdown(
         f'<div class="section-head"><h3>Pattern Alerts</h3><span class="count">{al_count} total</span></div>',
         unsafe_allow_html=True,
@@ -383,7 +378,6 @@ with tabs[0]:
                     unsafe_allow_html=True,
                 )
 
-    # --- Section: Corporate Announcements ---
     st.markdown(
         f'<div class="section-head"><h3>Corporate Filings & Announcements</h3><span class="count">{an_count} entries</span></div>',
         unsafe_allow_html=True,
@@ -505,60 +499,41 @@ with tabs[2]:
 
     with fund_tabs[1]:
         if all_symbols:
-            symbol = st.selectbox(
-                "Select Symbol", all_symbols, key="fund_sym_fin"
-            )
+            symbol = st.selectbox("Select Symbol", all_symbols, key="fund_sym_fin")
             if st.button("Fetch Financial Statements"):
                 financials = fundamentals.get_financials(symbol)
                 if financials:
-                    st.dataframe(financials)
+                    st.dataframe(financials, use_container_width=True)
                 else:
                     st.write("Financial data not available.")
 
     with fund_tabs[2]:
         if all_symbols:
-            symbol = st.selectbox(
-                "Select Symbol", all_symbols, key="fund_sym_qtr"
-            )
+            symbol = st.selectbox("Select Symbol", all_symbols, key="fund_sym_qtr")
             if st.button("Fetch Quarterly Results"):
                 qtr = fundamentals.get_quarterly_results(symbol)
                 if qtr:
-                    st.dataframe(qtr)
+                    st.dataframe(qtr, use_container_width=True)
                 else:
                     st.write("Quarterly data not available.")
 
     with fund_tabs[3]:
         if all_symbols:
-            symbol = st.selectbox(
-                "Select Symbol", all_symbols, key="fund_sym_peers"
-            )
-            if st.button("Fetch Peer Comparison"):
-                peers = fundamentals.get_peer_comparison(symbol)
+            symbol = st.selectbox("Select Symbol", all_symbols, key="fund_sym_peers")
+            if st.button("Fetch Peer Comparison") or f"peers_{symbol}" in st.session_state:
+                if st.session_state.get("peers_symbol") != symbol:
+                    st.session_state[f"peers_{symbol}"] = fundamentals.get_peer_comparison(symbol)
+                    st.session_state["peers_symbol"] = symbol
+
+                peers = st.session_state.get(f"peers_{symbol}")
                 if peers:
-                    st.dataframe(
-                        [
-                            {
-                                "Symbol": p["symbol"],
-                                "P/E": p.get("pe"),
-                                "ROE": p.get("roe"),
-                                "ROCE": p.get("roce"),
-                                "Debt/Equity": p.get("debt_to_equity"),
-                                "Market cap": p.get("market_cap"),
-                            }
-                            for p in peers
-                        ]
-                    )
+                    st.dataframe(peers, use_container_width=True)
                 else:
                     st.write("Peer comparison data not available.")
 
     with fund_tabs[4]:
-        st.caption(
-            "Best-effort: Shareholding data is rarely available for NSE stocks via free sources."
-        )
         if all_symbols:
-            symbol = st.selectbox(
-                "Symbol", all_symbols, key="shareholding_symbol"
-            )
+            symbol = st.selectbox("Symbol", all_symbols, key="shareholding_symbol")
             if st.button("Check shareholding"):
                 holding = fundamentals.get_shareholding(symbol)
                 if holding is None:
