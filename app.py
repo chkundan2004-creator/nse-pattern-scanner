@@ -7,7 +7,12 @@ import scanner
 import announcements
 import fundamentals
 
-st.set_page_config(page_title="NSE Pattern Scanner", layout="wide", page_icon="📈")
+st.set_page_config(
+    page_title="NSE Pattern Scanner",
+    layout="wide",
+    page_icon="📈",
+    initial_sidebar_state="expanded"
+)
 
 # ---------------------------------------------------------------------------
 # Design System & Styling
@@ -46,6 +51,23 @@ st.markdown(
 }
 body, .stApp, p, div, span, label { font-family: 'Inter', sans-serif; color: var(--text-100); }
 h1, h2, h3 { font-family: 'Space Grotesk', sans-serif !important; font-weight: 700 !important; }
+
+/* Force Sidebar Dark Styling */
+section[data-testid="stSidebar"] {
+  background-color: var(--ink-900) !important;
+  border-right: 1px solid var(--line-700) !important;
+}
+section[data-testid="stSidebar"] * {
+  color: var(--text-100) !important;
+}
+section[data-testid="stSidebar"] textarea {
+  background-color: var(--ink-800) !important;
+  color: var(--text-100) !important;
+  border: 1px solid var(--line-700) !important;
+}
+section[data-testid="stSidebar"] h2 {
+  color: var(--gold-500) !important;
+}
 
 /* Pulse strip */
 .pulse-strip {
