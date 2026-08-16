@@ -71,3 +71,24 @@ def get_shareholding(symbol):
         return holders.to_dict() if holders is not None and not holders.empty else None
     except Exception:
         return None
+def build_all_fundamentals():
+    """Generates fundamentals.json for tracked symbols when triggered by GitHub Actions."""
+    import scanner
+    symbols = scanner.load_tracking_list()
+    results = {}
+    print(f"Building fundamentals for {len(symbols)} symbols...")
+    for sym in symbols:
+        try:
+            overview = get_company_overview(sym)
+            if overview:
+                results[sym] = overview
+                print(f"Successfully fetched {sym}")
+        except Exception as e:
+            print(f"Error fetching {sym}: {e}")
+
+    with open(FUNDAMENTALS_FILE, "w") as f:
+        json.dump(results, f, indent=2)
+    print("Saved fundamentals.json successfully!")
+
+if __name__ == "__main__":
+    build_all_fundamentals()
