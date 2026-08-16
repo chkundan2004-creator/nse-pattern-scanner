@@ -213,7 +213,7 @@ def build_cash_flow_table(cashflow, n_periods=6):
 
 
 def build_fundamentals():
-    tracking = set(scanner.load_watchlist())
+    tracking = set(scanner.load_tracking_list())
     universe = scanner.load_universe()
     symbols = list(dict.fromkeys(list(tracking) + universe))
 
